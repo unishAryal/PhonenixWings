@@ -1,0 +1,81 @@
+.Box {
+  display: flex;
+  height: 100vh; /* Adjust height as needed */
+  padding: 20px 50px;
+  background: white;
+  justify-content: center;
+  align-items: center;
+  color: #121212;
+}
+
+.chatFilterBox,
+.chatBox {
+  flex: 1 0 auto; 
+  padding: 10px;
+  padding: 20px 20px;
+}
+
+#chatFilterBox {
+  flex: 220px 0 1;
+  border-right: solid 1px #2727277a;
+}
+
+#chatBox {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  /* background: blue; */
+  position: relative;
+  padding-bottom: 5px
+}
+
+.messageBox {
+  
+  margin-bottom: 10px; 
+  height: 100%;
+  border: solid 1px #2727277a;
+  padding: 20px;
+  border-radius: 15px;
+  
+}
+
+.inputBox {
+  border-top: solid 1px #2727277a;
+  display: flex; 
+  align-items: center; 
+  padding: 15px 10px;
+  /* width: 100%; */
+}
+
+.innerBox {
+  display: flex;
+  width: 900px;
+  height: 100vh;
+  border: solid 2px #000;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#userMessage {
+  border: none;
+  outline: none;
+  background: none;
+  border: solid 1px #2727277a;
+  border-radius: 15px;
+  padding: 10px 15px;
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sendButton > button {
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  background: rgb(40, 125, 195);
+  padding: 15px 20px;
+  color: #fff;
+  font-weight: 500;
+  margin-left: 10px
+}
