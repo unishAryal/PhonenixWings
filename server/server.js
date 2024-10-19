@@ -1,67 +1,63 @@
+console.log("Starting the app");
+
 const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
-const crypto = require('crypto');
-const bodyParser = require('body-parser');
-// const sql = require('mssql')
-// const config = require('./config/db');
-const { SlowBuffer } = require('buffer');
-
-
 const app = express();
-const PORT = process.env.PORT || 3001;
+const http = require('http');
 
-app.use(cors());
-app.use(bodyParser.json()); // For JSON payloads
+const { Server } = require('socket.io');
+const cors = require('cors');
+const { ExpressPeerServer} = require('peer');
 
 
-
-// Configure multer for file uploads
-const upload = multer({  storage: multer.memoryStorage()}); // 
-
-app.post("/send-message", upload.single('file'), async (req, res) => {
-  try{
-      const userMessage = req.body.message; // Get the message from the body
-      const file = req.file; // Access the uploaded file
-      console.log(userMessage);
-      console.log(file); // Log the file object for debugging
-
-      const authToken = crypto.randomBytes(8).toString("hex");
-      console.log(authToken);
-
-      // adding to the database or quering from the database should be here.
-      // for adding the file from multer memoryStorage, you need to say file.buffer
-
-      res.json({ message: 'Message received', authToken });
-  }
-  catch(err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  } 
-  // finally{
-  //   await sql.close();
-  // }
+const server = http.createServer(app);
+const peerServer = ExpressPeerServer(server, {
+	debug: true,
+	path: "/myapp",
 });
 
+app.use("/myapp", peerServer);
 
-app.post("/signInAuthentication", async (req, res) => {
-  try {
-    const { userName, passWord } = req.body;
-    console.log(userName);
-    console.log(passWord); 
+console.log("server is a starting thing");
 
-    //  authentication logic here
+let isSocketInitialized = false;
+let io;
 
-    // Send a response
-    res.status(200).json({ message: "Authentication successful" });
-  }
-  catch(err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  } 
+const SocketHandler = (req, res) => {
+    if (!isSocketInitialized) {
+        io = new Server(server, {
+            cors: {
+                origin: "*", // Replace with your frontend URL in production
+                methods: ["GET", "POST"]
+            }
+        });
+        
+        io.on('connection', (socket) => {
+            console.log("A client connected on socket id", socket.id);
+        
+            socket.on('joinRoom', (roomId, userId) => {
+                console.log(`new user with ${userId} userid, joined ${roomId} room.`);
+        
+                // Make sure to join the room and emit the event inside this callback
+                socket.join(roomId);  // This will allow the user to join the room
+                socket.broadcast.to(roomId).emit('userConnected', userId);  // Notify others in the room
+            });
+        });
+        
+        
+        isSocketInitialized = true;
+        console.log("io initialized");
+    } else {
+        console.log('Socket already initialized.');
+    }
+
+    if (res) {
+        res.end();
+    }
+}
+
+const PORT = process.env.PORT || 5001;
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    SocketHandler(); // Initialize the socket when the server starts
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
